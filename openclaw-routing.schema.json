@@ -1,0 +1,508 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openclaw.local/schemas/coding/openclaw-routing.schema.json",
+  "title": "OpenClaw Coding Skill Routing Schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "skill",
+    "version",
+    "session_scope",
+    "state_namespace",
+    "global_mutation",
+    "artifacts",
+    "difficulty_policy",
+    "routing_presets",
+    "default_preset",
+    "stages",
+    "handoff_contracts",
+    "local_state_fields"
+  ],
+  "properties": {
+    "skill": {
+      "type": "string",
+      "const": "coding"
+    },
+    "version": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "session_scope": {
+      "type": "string",
+      "const": "local_only"
+    },
+    "state_namespace": {
+      "type": "string",
+      "const": "coding"
+    },
+    "global_mutation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "change_default_model",
+        "change_global_routing",
+        "change_other_skills"
+      ],
+      "properties": {
+        "change_default_model": {
+          "type": "boolean",
+          "const": false
+        },
+        "change_global_routing": {
+          "type": "boolean",
+          "const": false
+        },
+        "change_other_skills": {
+          "type": "boolean",
+          "const": false
+        }
+      }
+    },
+    "artifacts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "required",
+        "optional_on_user_request"
+      ],
+      "properties": {
+        "required": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "contains": {
+            "const": "plan.md"
+          },
+          "minItems": 1
+        },
+        "optional_on_user_request": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "difficulty_policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "simple",
+        "standard",
+        "complex"
+      ],
+      "properties": {
+        "simple": {
+          "$ref": "#/$defs/difficultyStagePolicy"
+        },
+        "standard": {
+          "$ref": "#/$defs/difficultyStagePolicy"
+        },
+        "complex": {
+          "$ref": "#/$defs/difficultyStagePolicy"
+        }
+      }
+    },
+    "routing_presets": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "two_model_default",
+        "single_model_codex",
+        "three_model_experimental"
+      ],
+      "properties": {
+        "two_model_default": {
+          "$ref": "#/$defs/routingPreset"
+        },
+        "single_model_codex": {
+          "$ref": "#/$defs/routingPreset"
+        },
+        "three_model_experimental": {
+          "$ref": "#/$defs/routingPreset"
+        }
+      }
+    },
+    "default_preset": {
+      "type": "string",
+      "enum": [
+        "two_model_default",
+        "single_model_codex",
+        "three_model_experimental"
+      ]
+    },
+    "stages": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "clarify",
+        "brief",
+        "plan",
+        "implement",
+        "review",
+        "final_report"
+      ],
+      "properties": {
+        "clarify": {
+          "$ref": "#/$defs/clarifyStage"
+        },
+        "brief": {
+          "$ref": "#/$defs/briefStage"
+        },
+        "plan": {
+          "$ref": "#/$defs/planStage"
+        },
+        "implement": {
+          "$ref": "#/$defs/implementStage"
+        },
+        "review": {
+          "$ref": "#/$defs/reviewStage"
+        },
+        "final_report": {
+          "$ref": "#/$defs/finalReportStage"
+        }
+      }
+    },
+    "handoff_contracts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "brief",
+        "implementation_report",
+        "review_delta"
+      ],
+      "properties": {
+        "brief": {
+          "$ref": "#/$defs/nonEmptyStringArray"
+        },
+        "implementation_report": {
+          "$ref": "#/$defs/nonEmptyStringArray"
+        },
+        "review_delta": {
+          "$ref": "#/$defs/nonEmptyStringArray"
+        }
+      }
+    },
+    "local_state_fields": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^coding\\."
+      },
+      "minItems": 1
+    }
+  },
+  "$defs": {
+    "stageName": {
+      "type": "string",
+      "enum": [
+        "clarify",
+        "brief",
+        "plan",
+        "implement",
+        "review",
+        "final_report"
+      ]
+    },
+    "nonEmptyStringArray": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 1
+    },
+    "difficultyStagePolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "brief_required",
+        "stages",
+        "optional_stages"
+      ],
+      "properties": {
+        "brief_required": {
+          "type": "boolean"
+        },
+        "stages": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/stageName"
+          },
+          "minItems": 1
+        },
+        "optional_stages": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/stageName"
+          }
+        }
+      }
+    },
+    "routingPreset": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "clarify",
+        "brief",
+        "plan",
+        "implement",
+        "review",
+        "final_report"
+      ],
+      "properties": {
+        "clarify": {
+          "type": "string",
+          "minLength": 1
+        },
+        "brief": {
+          "type": "string",
+          "minLength": 1
+        },
+        "plan": {
+          "type": "string",
+          "minLength": 1
+        },
+        "implement": {
+          "type": "string",
+          "minLength": 1
+        },
+        "review": {
+          "type": "string",
+          "minLength": 1
+        },
+        "final_report": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "baseStage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "prompt_file",
+        "output_contract"
+      ],
+      "properties": {
+        "prompt_file": {
+          "type": "string",
+          "pattern": "^prompts/.+\\.md$"
+        },
+        "output_contract": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "clarifyStage": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/baseStage"
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "prompt_file",
+            "output_contract",
+            "stop_conditions"
+          ],
+          "properties": {
+            "prompt_file": {
+              "const": "prompts/clarify.md"
+            },
+            "output_contract": {
+              "const": "clarify_output"
+            },
+            "stop_conditions": {
+              "$ref": "#/$defs/nonEmptyStringArray"
+            }
+          }
+        }
+      ]
+    },
+    "briefStage": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/baseStage"
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "prompt_file",
+            "output_contract",
+            "optional"
+          ],
+          "properties": {
+            "prompt_file": {
+              "const": "prompts/brief.md"
+            },
+            "output_contract": {
+              "const": "brief"
+            },
+            "optional": {
+              "type": "boolean",
+              "const": true
+            }
+          }
+        }
+      ]
+    },
+    "planStage": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/baseStage"
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "prompt_file",
+            "output_contract",
+            "requires_project_root",
+            "project_root_policy",
+            "creates"
+          ],
+          "properties": {
+            "prompt_file": {
+              "const": "prompts/plan.md"
+            },
+            "output_contract": {
+              "const": "plan_md"
+            },
+            "requires_project_root": {
+              "type": "boolean"
+            },
+            "project_root_policy": {
+              "type": "string",
+              "enum": [
+                "resolve_or_create_during_plan",
+                "must_exist_before_plan"
+              ]
+            },
+            "creates": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "contains": {
+                "const": "plan.md"
+              },
+              "minItems": 1
+            }
+          }
+        }
+      ]
+    },
+    "implementStage": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/baseStage"
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "prompt_file",
+            "output_contract",
+            "requires"
+          ],
+          "properties": {
+            "prompt_file": {
+              "const": "prompts/implement.md"
+            },
+            "output_contract": {
+              "const": "implementation_report"
+            },
+            "requires": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "contains": {
+                "const": "plan.md"
+              },
+              "minItems": 1
+            }
+          }
+        }
+      ]
+    },
+    "reviewStage": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/baseStage"
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "prompt_file",
+            "output_contract",
+            "loop"
+          ],
+          "properties": {
+            "prompt_file": {
+              "const": "prompts/review.md"
+            },
+            "output_contract": {
+              "const": "review_result"
+            },
+            "loop": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "enabled",
+                "reenter_stage_on_changes_required",
+                "delta_contract"
+              ],
+              "properties": {
+                "enabled": {
+                  "type": "boolean",
+                  "const": true
+                },
+                "reenter_stage_on_changes_required": {
+                  "const": "implement"
+                },
+                "delta_contract": {
+                  "const": "review_delta"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "finalReportStage": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/baseStage"
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "prompt_file",
+            "output_contract",
+            "requires_review_approval"
+          ],
+          "properties": {
+            "prompt_file": {
+              "const": "prompts/final-report.md"
+            },
+            "output_contract": {
+              "const": "user_report"
+            },
+            "requires_review_approval": {
+              "type": "boolean",
+              "const": true
+            }
+          }
+        }
+      ]
+    }
+  }
+}

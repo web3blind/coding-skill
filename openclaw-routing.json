@@ -1,0 +1,167 @@
+{
+  "skill": "coding",
+  "version": 1,
+  "session_scope": "local_only",
+  "state_namespace": "coding",
+  "global_mutation": {
+    "change_default_model": false,
+    "change_global_routing": false,
+    "change_other_skills": false
+  },
+  "artifacts": {
+    "required": [
+      "plan.md"
+    ],
+    "optional_on_user_request": [
+      "brief.md",
+      "implementation-report.md",
+      "review-report.md"
+    ]
+  },
+  "difficulty_policy": {
+    "simple": {
+      "brief_required": false,
+      "stages": [
+        "clarify",
+        "plan",
+        "implement",
+        "review",
+        "final_report"
+      ],
+      "optional_stages": []
+    },
+    "standard": {
+      "brief_required": false,
+      "stages": [
+        "clarify",
+        "plan",
+        "implement",
+        "review",
+        "final_report"
+      ],
+      "optional_stages": [
+        "brief"
+      ]
+    },
+    "complex": {
+      "brief_required": true,
+      "stages": [
+        "clarify",
+        "brief",
+        "plan",
+        "implement",
+        "review",
+        "final_report"
+      ],
+      "optional_stages": []
+    }
+  },
+  "routing_presets": {
+    "two_model_default": {
+      "clarify": "Minimax",
+      "brief": "Minimax",
+      "plan": "Codex",
+      "implement": "Codex",
+      "review": "Minimax",
+      "final_report": "Minimax"
+    },
+    "single_model_codex": {
+      "clarify": "Codex",
+      "brief": "Codex",
+      "plan": "Codex",
+      "implement": "Codex",
+      "review": "Codex",
+      "final_report": "Codex"
+    },
+    "three_model_experimental": {
+      "clarify": "Minimax",
+      "brief": "Minimax",
+      "plan": "Codex",
+      "implement": "Kimi",
+      "review": "Minimax",
+      "final_report": "Minimax"
+    }
+  },
+  "default_preset": "two_model_default",
+  "stages": {
+    "clarify": {
+      "prompt_file": "prompts/clarify.md",
+      "output_contract": "clarify_output",
+      "stop_conditions": [
+        "requirements_ambiguous",
+        "acceptance_criteria_missing",
+        "stack_constraints_unknown"
+      ]
+    },
+    "brief": {
+      "prompt_file": "prompts/brief.md",
+      "output_contract": "brief",
+      "optional": true
+    },
+    "plan": {
+      "prompt_file": "prompts/plan.md",
+      "output_contract": "plan_md",
+      "requires_project_root": false,
+      "project_root_policy": "resolve_or_create_during_plan",
+      "creates": [
+        "project_folder",
+        "plan.md"
+      ]
+    },
+    "implement": {
+      "prompt_file": "prompts/implement.md",
+      "output_contract": "implementation_report",
+      "requires": [
+        "plan.md"
+      ]
+    },
+    "review": {
+      "prompt_file": "prompts/review.md",
+      "output_contract": "review_result",
+      "loop": {
+        "enabled": true,
+        "reenter_stage_on_changes_required": "implement",
+        "delta_contract": "review_delta"
+      }
+    },
+    "final_report": {
+      "prompt_file": "prompts/final-report.md",
+      "output_contract": "user_report",
+      "requires_review_approval": true
+    }
+  },
+  "handoff_contracts": {
+    "brief": [
+      "goal",
+      "constraints",
+      "stack",
+      "acceptance_criteria",
+      "unknowns",
+      "risks"
+    ],
+    "implementation_report": [
+      "completed_work",
+      "changed_files",
+      "tests_or_checks",
+      "blockers",
+      "open_risks",
+      "plan_deviations",
+      "recommended_next_step"
+    ],
+    "review_delta": [
+      "issue",
+      "why_it_matters",
+      "required_change",
+      "acceptance_check"
+    ]
+  },
+  "local_state_fields": [
+    "coding.session_id",
+    "coding.stage",
+    "coding.models",
+    "coding.project_root",
+    "coding.plan_path",
+    "coding.review_round",
+    "coding.acceptance_status"
+  ]
+}
