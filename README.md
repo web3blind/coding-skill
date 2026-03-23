@@ -115,6 +115,27 @@ Implementation follows `plan.md` and produces:
 - validation results
 - a structured implementation report
 
+#### TDD (Test-Driven Development)
+
+For each implementation task, follow the RED → GREEN → REFACTOR cycle:
+
+1. **RED** — Write a failing test that describes expected behavior
+2. **GREEN** — Write minimal code to make the test pass
+3. **REFACTOR** — Improve code without changing behavior
+
+This ensures test coverage from the first lines, fast feedback, and confidence during refactoring.
+
+#### Subagent-Driven Development (optional)
+
+For large tasks requiring >30 minutes of work:
+
+1. Break the plan into atomic tasks (2-5 minutes each)
+2. Subagent completes task → Review → Next task
+3. Micro-review after each subtask
+
+Use for: long-running tasks, many independent subtasks.
+Skip for: simple tasks (<15 min), tasks requiring deep context.
+
 ### 5. Review Loop
 
 Review compares:
@@ -135,6 +156,17 @@ After review passes, the skill returns a concise user-facing summary of:
 - what was delivered
 - what was validated
 - what remains limited or deferred
+
+### 4-Phase Debugging
+
+For complex bugs, use the formal debugging approach:
+
+1. **Observe** — Gather facts: full error message, stack trace, context. Reproduce the issue.
+2. **Hypothesize** — Form possible causes. Identify the most likely hypothesis.
+3. **Test** — Write a test that confirms or refutes the hypothesis.
+4. **Fix** — Make minimal change to solve the problem. Verify tests pass.
+
+Repeat if the bug isn't fixed on the first attempt.
 
 ## Files Created During Use
 
@@ -204,3 +236,15 @@ This skill is not ideal for:
 - requests where the user explicitly wants direct coding with no staged flow
 
 For those cases, a simpler direct coding flow is usually better.
+
+---
+
+## Changelog
+
+### 2026-03-23
+
+Added from Superpowers methodology:
+
+- **TDD (Test-Driven Development)** — RED → GREEN → REFACTOR cycle in Implementation
+- **Subagent-Driven Development** — atomic tasks (2-5 min), micro-reviews for large tasks
+- **4-Phase Debugging** — Observe → Hypothesize → Test → Fix
