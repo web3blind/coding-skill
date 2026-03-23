@@ -205,6 +205,13 @@ The review model checks the result against:
 - test or validation results
 - the implementation report
 
+**Проверка тестов и TDD:**
+
+- `tests_written`: yes | no | n/a
+- `tdd_cycles_completed`: yes | no | n/a
+
+Если тесты не написаны или TDD циклы не завершены — запросить объяснение или исправление.
+
 If the review finds gaps, it should return a bounded delta task to implementation instead of restarting the project from scratch.
 
 Repeat the loop until:
@@ -271,6 +278,7 @@ Every implementation pass should hand review a structured packet containing:
 
 - `completed_work`
 - `changed_files`
+- `tdd_cycles` — количество пройденных циклов TDD (RED → GREEN → REFACTOR)
 - `tests_or_checks`
 - `blockers`
 - `open_risks`
@@ -331,17 +339,29 @@ Prefer chat-local or runtime-local handoffs for everything except `plan.md`.
 
 ## STOP And Ask
 
-Stop and ask before proceeding if any of the following is true:
+### Hard Stop (всегда спрашивать)
 
-- The requested project behavior is ambiguous.
-- Core requirements or acceptance criteria are missing.
-- The target stack or runtime constraints are unknown and matter to the plan.
-- The project folder path is unclear.
-- The plan would require risky assumptions the user has not accepted.
-- The implementation needs dependencies, credentials, auth changes, or external services that were not agreed.
-- A reviewer requests changes that widen scope beyond the plan.
-- You are unsure which stage should own the next action.
-- You are unsure whether a model switch would escape the current skill session.
+Остановиться и спросить, если:
+
+- Стек неизвестен и влияет на план
+- Credentials или external services не согласованы с пользователем
+- Review запрашивает выход за рамки плана
+
+### Soft Check (спрашивать только если нельзя вывести из контекста)
+
+Остановиться и уточнить, если:
+
+- Path (путь до проекта) непятен
+- Criteria (критерии приёмки) отсутствуют и не выводятся из контекста
+
+### Автономные решения
+
+Всё остальное — агент решает сам и фиксирует в `plan.md`:
+
+- Как разбить задачу на этапы
+- Какую архитектуру выбрать
+- Какие файлы создать
+- Как реализовать валидацию
 
 ## References And Decisions
 

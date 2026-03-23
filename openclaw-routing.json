@@ -90,7 +90,8 @@
       "stop_conditions": [
         "requirements_ambiguous",
         "acceptance_criteria_missing",
-        "stack_constraints_unknown"
+        "stack_constraints_unknown",
+        "test_strategy_unknown"
       ]
     },
     "brief": {
@@ -142,6 +143,7 @@
     "implementation_report": [
       "completed_work",
       "changed_files",
+      "tdd_cycles",
       "tests_or_checks",
       "blockers",
       "open_risks",
