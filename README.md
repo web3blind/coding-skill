@@ -241,7 +241,19 @@ For those cases, a simpler direct coding flow is usually better.
 
 ## Changelog
 
-### 2026-03-23
+### 2026-03-23 (v2)
+
+Added from external review:
+
+- **Hard/Soft Stop** — STOP And Ask split:
+  - Hard Stop: always ask (unknown stack, credentials, scope creep)
+  - Soft Check: ask only if can't derive from context
+  - Autonomous decisions: agent decides and documents in plan.md
+- **TDD in Review** — tests_written and tdd_cycles_completed checks
+- **tdd_cycles in Report** — implementation report tracks TDD cycles
+- **test_strategy_unknown** — added to clarify stop_conditions
+
+### 2026-03-23 (v1)
 
 Added from Superpowers methodology:
 
