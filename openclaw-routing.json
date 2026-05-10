@@ -8,6 +8,16 @@
     "change_global_routing": false,
     "change_other_skills": false
   },
+  "child_session_policy": {
+    "inherit_fast_mode": false,
+    "require_explicit_fast_off": true,
+    "apply_fast_off_before_stage_prompt": [
+      "plan",
+      "implement",
+      "review"
+    ],
+    "fail_closed_if_fast_off_unavailable": true
+  },
   "artifacts": {
     "required": [
       "plan.md"
@@ -90,7 +100,8 @@
       "stop_conditions": [
         "requirements_ambiguous",
         "acceptance_criteria_missing",
-        "stack_constraints_unknown"
+        "stack_constraints_unknown",
+        "test_strategy_unknown"
       ]
     },
     "brief": {
@@ -142,6 +153,7 @@
     "implementation_report": [
       "completed_work",
       "changed_files",
+      "tdd_cycles",
       "tests_or_checks",
       "blockers",
       "open_risks",
