@@ -10,6 +10,7 @@
     "session_scope",
     "state_namespace",
     "global_mutation",
+    "child_session_policy",
     "artifacts",
     "difficulty_policy",
     "routing_presets",
@@ -55,6 +56,37 @@
         "change_other_skills": {
           "type": "boolean",
           "const": false
+        }
+      }
+    },
+    "child_session_policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "inherit_fast_mode",
+        "require_explicit_fast_off",
+        "apply_fast_off_before_stage_prompt",
+        "fail_closed_if_fast_off_unavailable"
+      ],
+      "properties": {
+        "inherit_fast_mode": {
+          "type": "boolean",
+          "const": false
+        },
+        "require_explicit_fast_off": {
+          "type": "boolean",
+          "const": true
+        },
+        "apply_fast_off_before_stage_prompt": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/stageName"
+          }
+        },
+        "fail_closed_if_fast_off_unavailable": {
+          "type": "boolean",
+          "const": true
         }
       }
     },
@@ -280,7 +312,6 @@
     },
     "baseStage": {
       "type": "object",
-      "additionalProperties": false,
       "required": [
         "prompt_file",
         "output_contract"

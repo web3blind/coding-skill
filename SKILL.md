@@ -14,6 +14,8 @@ Project-oriented delivery workflow for OpenClaw.
 
 This skill is for `/coding` sessions where the user describes a project or feature and expects a high-quality handoff from clarification to plan to implementation.
 
+`/coding` is also the owner-mode for substantial inspection of the local technical workspace state: code, config, skills, scripts, cron, workflow, routing, architecture, and substantial edits to those artifacts.
+
 ## Hard Contract
 
 These rules are the controlling contract for this skill.
@@ -30,6 +32,18 @@ These rules are the controlling contract for this skill.
 10. Review may send a delta back to implementation and repeat until the work is complete.
 11. Do not create extra markdown artifacts such as `brief.md`, `implementation-report.md`, or `review-report.md` unless the user explicitly asks.
 12. **Architectural unity, code transparency, and code hygiene are non-negotiable.** Every piece of code must be clear, consistent, and maintainable.
+13. Any `/coding` execution that performs planning, implementation, or review via a spawned subagent must explicitly disable fast mode in that child session before substantive work starts.
+14. Fast-mode inheritance from the parent session is forbidden for `/coding` subagents.
+15. After a user confirmation like `да`, `делай`, `давай`, `давай попробуем`, `ок`, `go`, or `поехали`, do not spend the turn on a standalone acknowledgement. Start execution in that same turn.
+16. After such a start signal, silent execution in the parent session is forbidden. The parent must either return the final result in the same assistant message, if the work is truly immediate, or send a short status/progress message and in that same turn hand execution off to a subagent.
+17. If the work should continue without waiting for another user message, `/coding` should prefer a subagent, send standalone `/fast off` to that child, and then `sessions_yield` instead of ending with a passive acknowledgement.
+18. If subagent handoff is unavailable, thread binding is unsupported, or `/fast off` cannot be applied in the child, immediately fall back to executing in the current session. Do not surface that internal limitation to the user as a blocker unless it truly prevents the requested work.
+19. Do not send a standalone status update as a substitute for execution. A status/progress message is valid only when it is immediately followed in the same turn by the final result, by the actual execution handoff, or by visible continued execution in the current session under the fallback rule.
+20. For ordinary `/coding`, subagent-driven execution is the default. Treat work as substantive by default and do not continue it in the parent session unless the task is limited to a necessary clarification, a truly immediate final answer, or the fallback rule is active because child execution is not operable in the current environment.
+21. `/coding цикл` means autonomous execution loop: after confirmation, immediately start an implementation/review cycle and keep working until a concrete result or blocker is ready; use a subagent when available, otherwise continue in the current session under the fallback rule.
+22. Do not make adjacent cleanup changes outside the requested scope. Do not rewrite nearby comments, formatting, naming, or unrelated code unless the user asked for that cleanup.
+23. Prefer the simplest implementation that satisfies the request. Do not add speculative abstractions, configurability, extensibility, or future-proofing unless the user explicitly asks for them or the accepted plan requires them.
+24. When ambiguity is minor and a reasonable default is available, choose it and record the assumption in the plan or final report. Ask the user only when the ambiguity would materially affect architecture, API, data model, UX, validation strategy, or acceptance criteria.
 
 If anything in `references/`, `decisions/`, `prompts/`, or `openclaw-routing.json` conflicts with this contract, ignore the conflicting guidance.
 
@@ -54,6 +68,18 @@ With the models currently available to the user, prefer:
 - `Codex` for planning and writing `plan.md`
 - `Codex` for implementation
 - `Minimax` for independent review and the final user-facing report
+
+### Fast-mode isolation
+
+`/coding` must not inherit fast-mode behavior from the parent chat when it spawns a child session for planning, implementation, or review.
+
+Required rule:
+
+- if a `/coding` child session is spawned, explicitly send a standalone `/fast off` to that child session before the actual planning, implementation, or review prompt
+- do not rely on parent-session defaults, inheritance, or implied non-fast behavior
+- if fast mode cannot be explicitly disabled in the child session, do not use that child for substantive work; immediately fall back to the current session unless the task is truly blocked for another reason
+
+This is a mandatory execution rule, not an optional hint.
 
 ### Allowed simplifications
 
@@ -84,9 +110,9 @@ Classify each `/coding` request before acting:
 
 Routing guidance:
 
-- `simple` -> clarify only what is missing, then go straight to plan
-- `standard` -> clarify, optional brief, plan, implement, review
-- `complex` -> clarify, brief, plan, implementation/review loop, final report
+- `simple` -> clarify only what is missing, then go straight to plan, usually through a subagent unless the final answer is truly immediate
+- `standard` -> clarify, optional brief, plan, implement, review, using a subagent by default
+- `complex` -> clarify, brief, plan, implementation/review loop, final report, using a subagent-driven path
 
 ## Workflow
 
@@ -153,6 +179,48 @@ If architecture is unclear, the planner may compare options before choosing a di
 
 After `plan.md` exists, implementation may start.
 
+### Immediate execution after confirmation
+
+When the user has already confirmed execution, `/coding` must treat that message as the start signal, not as a request for another acknowledgement turn.
+
+Required behavior:
+
+- If the task can be completed immediately, return the final result in the same assistant message.
+- Otherwise, send a short status/progress message and, in the same turn, immediately start the execution path.
+- Prefer spawning a subagent.
+- Use the parent session for a necessary clarification only when that clarification materially blocks planning or execution.
+- After spawning a child, explicitly disable fast mode there with a standalone `/fast off` message before the real task prompt.
+- If child execution is not operable in the current environment, continue immediately in the current session instead of surfacing the handoff problem to the user.
+- When a child is used, the parent session must then `sessions_yield` and wait for the child result instead of idling or continuing invisible execution in the parent.
+- A status/progress message without immediate execution handoff, visible current-session execution, or final result is not sufficient.
+
+### Forbidden silent execution
+
+The following pattern is forbidden in `/coding`:
+
+- the user gives a clear start signal
+- the assistant appears to begin work
+- no final result is returned in the same message
+- no subagent handoff occurs
+- no visible current-session execution begins
+- no yielded execution state is established
+
+This pattern creates "I started but nothing came back" failures and must be avoided.
+
+### `/coding цикл`
+
+`/coding цикл` is the explicit autonomous mode for `/coding`.
+
+Semantics:
+
+- confirmation from the user is enough to start; do not ask for a second go-ahead
+- run as a subagent-driven loop, not as a single acknowledgement reply
+- preferred loop: implement -> validate -> review -> either continue or report blocker
+- return to the user only with one of three states:
+  - concrete completed progress
+  - a precise blocker that needs human input
+  - a short checkpoint if the user explicitly asked for checkpoints
+
 **TDD (Test-Driven Development)** — применяй для каждой задачи в implementation:
 
 1. **RED** — Напиши падающий тест, который описывает ожидаемое поведение. Тест должен упасть, потому что функционала ещё нет.
@@ -166,10 +234,63 @@ After `plan.md` exists, implementation may start.
 
 ---
 
+### 4.0.1 Импорты и зависимости (Node.js/JavaScript)
+
+**Все `require` / `import` должны быть в начале файла**, перед любым другим кодом (кроме комментариев).
+
+Правила:
+
+1. **require в начале файла:**
+   ```javascript
+   // ✅ Правильно
+   const fs = require('fs');
+   const path = require('path');
+
+   function myFunc() { ... }
+
+   // ❌ Неправильно (require внутри функции)
+   function myFunc() {
+     const fs = require('fs'); // НЕ делай так
+   }
+   ```
+
+2. **Проверяй дубли:**
+   - Перед добавлением нового `require` — проверь, не импортируется ли уже этот модуль в файле
+   - Используй существующий импорт вместо создания нового
+   ```javascript
+   // ❌ Дублирование
+   const fs = require('fs');
+   // ...много кода...
+   function later() {
+     const fs = require('fs'); // Лишнее!
+   }
+   ```
+
+3. **Порядок импортов:**
+   - Встроенные модули Node.js (`fs`, `path`, `os` и т.д.)
+   - Внешние npm-пакеты
+   - Локальные модули проекта (с относительными путями `./` или `../`)
+
+4. **Для ESM `import`:**
+   ```javascript
+   // ✅ Правильно
+   import { readFile } from 'fs/promises';
+   import express from 'express';
+   import { helper } from './utils/helper.js';
+   ```
+
+---
+
 ### 4.1 Subagent-Driven Development (опционально)
 
-Для больших задач, требующих много времени, используй subagent-driven подход:
+Для больших задач, требующих много времени, используй subagent-driven подход.
 
+Для `/coding цикл` subagent-driven execution предпочителен, но при технической недоступности child execution нужно сразу продолжать в текущей сессии, а не останавливать работу сообщением о внутреннем ограничении.
+
+Для обычного `/coding` subagent-driven execution является режимом по умолчанию и должен пропускаться только для необходимого уточнения, когда финальный ответ реально можно вернуть сразу в текущем сообщении, или когда child execution недоступен в текущей среде.
+
+
+0. **Перед реальной работой subagent-а принудительно отключи fast mode** — отправь в child session отдельное сообщение `/fast off`, дождись применения и только потом передавай задачу на планирование, implementation или review. Если это невозможно, не используй child и сразу работай в текущей сессии.
 1. **Разбей план на атомарные задачи** (каждая 2-5 минут работы)
 2. **Subagent выполняет задачу → Review → Следующая**
 3. После каждой подзадачи — микро-ревью перед переходом к следующей
@@ -189,6 +310,9 @@ The implementation model should:
 
 - follow the plan instead of widening scope
 - make concrete code changes
+- prefer the simplest implementation that meets the accepted plan and request
+- avoid speculative abstractions or future-proofing that were not requested
+- avoid adjacent cleanup outside the requested scope
 - run relevant validation where possible
 - note blockers early
 - keep a structured implementation report for handoff
@@ -314,6 +438,8 @@ Rules:
 - Clear or discard those overrides when the skill exits.
 - Do not mutate the main OpenClaw conversation defaults.
 - Do not let `/coding` routing leak into unrelated chats or skills.
+- For spawned `/coding` child sessions, explicitly apply `/fast off` inside the child before the first substantive stage prompt.
+- Treat a missing explicit child-session fast-off step as a contract violation.
 
 ## Artifact Rules
 
