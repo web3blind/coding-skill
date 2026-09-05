@@ -25,7 +25,7 @@ Instructions:
    - Enable RLS for user-specific database tables
    - Add rate limiting for API endpoints
    - Implement proper access control for authenticated users
-5. Run relevant tests or checks where possible.
+5. Run the project-documented tests/checks and retain their real exit status and diagnostics. Preserve existing code and other tasks' changes; use TDD without deleting existing implementation. For UI work, exercise the changed browser flow when practical. Protect persistent data before risky operations.
 6. If blocked, explain the blocker precisely.
 7. End every pass with a structured implementation report.
 

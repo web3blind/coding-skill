@@ -1,6 +1,10 @@
 # coding
 
-`/coding` is an OpenClaw skill for project-oriented delivery.
+`/coding` is a project-delivery skill for Hermes and compatible coding agents.
+
+The current [SKILL.md](SKILL.md) is the controlling contract: scoped execution, preservation of existing work, real test exit status, browser verification, production-data protection, and reviewed Git publication. It uses the configured runtime rather than requiring a particular model split.
+
+The model-routing sections and JSON files below are retained as legacy integration examples. They do not configure Hermes or override the current contract. Load them only for an explicitly requested compatible integration.
 
 It is designed for sessions where the user describes a project, feature, or implementation goal and expects a structured handoff from clarification to planning to coding to review.
 

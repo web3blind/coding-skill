@@ -25,8 +25,8 @@ Instructions:
    - Is RLS enabled for user-specific data?
    - Are there rate limits for API endpoints?
    - Is access control implemented for user-specific operations?
-   - Are there automated security scans in CI/CD?
-4. If acceptable, approve it clearly.
+   - Are the security checks required by this project passing? External or paid scanning is optional and needs authorization.
+4. Independently inspect the actual diff and evidence. Preserve inherited staged/unstaged work; use an isolated baseline instead of automatically stashing the checkout. Verify real test exit status and the relevant browser/API flow before approval.
 5. If not acceptable, produce a bounded delta only for the missing or wrong work.
 6. Do not reopen architecture or widen scope unless the user changed scope.
 
